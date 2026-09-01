@@ -42,124 +42,10 @@ function headers(apiKey?: string | null): HeadersInit {
   return h;
 }
 
-/* ------------------------------ mock backend ------------------------------ */
-
-const DICT: Array<{ word: string; suggestion: string; alternatives: string[]; reason: string; type: IssueType; definition: string; pos: string }> = [
-  {
-    word: "សាលោរៀន",
-    suggestion: "សាលារៀន",
-    alternatives: ["សាលា", "គ្រឹះស្ថានសិក្សា"],
-    reason: "អក្ខរាវិរុទ្ធមិនត្រឹមត្រូវ៖ ត្រូវប្រើ «សាលា» មិនមែន «សាលោ» ទេ។",
-    type: "spelling",
-    definition: "កន្លែងសម្រាប់បង្រៀន និងរៀនសូត្រ",
-    pos: "នាម",
-  },
-  {
-    word: "ណាស់ណាស់",
-    suggestion: "ណាស់",
-    alternatives: ["ខ្លាំង", "ក្រៃលែង"],
-    reason: "ពាក្យស្ទួន៖ មិនចាំបាច់ប្រើពីរដងទេ។",
-    type: "style",
-    definition: "គុណកិរិយាបញ្ជាក់កម្រិត",
-    pos: "គុណកិរិយា",
-  },
-  {
-    word: "ទៅកាន់ទៅ",
-    suggestion: "ទៅកាន់",
-    alternatives: ["ទៅ"],
-    reason: "ពាក្យលើស។",
-    type: "style",
-    definition: "ធ្នាក់បង្ហាញទិសដៅ",
-    pos: "ធ្នាក់",
-  },
-];
-
-function findAll(text: string, word: string): number[] {
-  const out: number[] = [];
-  let i = text.indexOf(word);
-  while (i !== -1) {
-    out.push(i);
-    i = text.indexOf(word, i + word.length);
-  }
-  return out;
-}
-
-function mockCheck(text: string): CheckResponse {
-  const issues: Issue[] = [];
-  for (const entry of DICT) {
-    for (const start of findAll(text, entry.word)) {
-      issues.push({
-        start,
-        end: start + entry.word.length,
-        original: entry.word,
-        suggestion: entry.suggestion,
-        alternatives: entry.alternatives,
-        reason: entry.reason,
-        type: entry.type,
-        source: "dictionary",
-        definition: entry.definition,
-        pos: entry.pos,
-        confidence: 0.7,
-      });
-    }
-  }
-  // A deliberate dictionary false positive the AI pass will later remove.
-  for (const start of findAll(text, "ស្អែក")) {
-    issues.push({
-      start,
-      end: start + "ស្អែក".length,
-      original: "ស្អែក",
-      suggestion: "ថ្ងៃស្អែក",
-      alternatives: [],
-      reason: "ពាក្យមិនមានក្នុងវចនានុក្រម។",
-      type: "spelling",
-      source: "dictionary",
-      definition: "ថ្ងៃបន្ទាប់",
-      pos: "នាម",
-      confidence: 0.3,
-    });
-  }
-  issues.sort((a, b) => a.start - b.start);
-  return { issues, tokens: text.trim() ? text.trim().split(/\s+/).length : 0, backend: "mock-dictionary", ai: false };
-}
-
-function mockRefine(text: string, phase1: Issue[]): CheckResponse {
-  // Drop the low-confidence dictionary false positives...
-  const refined = phase1.filter((i) => (i.confidence ?? 1) >= 0.5).map((i) => ({ ...i, source: "ai", confidence: 0.95 }));
-  // ...and add a grammar issue only an AI pass would catch.
-  for (const start of findAll(text, "កាលពីស្អែក")) {
-    refined.push({
-      start,
-      end: start + "កាលពីស្អែក".length,
-      original: "កាលពីស្អែក",
-      suggestion: "កាលពីម្សិលមិញ",
-      alternatives: ["ម្សិលមិញ", "ពីព្រឹកមិញ"],
-      reason: "ភាពមិនស៊ីគ្នានៃកាល៖ «កាលពី» សំដៅអតីតកាល តែ «ស្អែក» ជាអនាគតកាល។",
-      type: "grammar",
-      source: "ai",
-      definition: "កន្សោមកាលវេលា",
-      pos: "កន្សោម",
-      confidence: 0.92,
-    });
-  }
-  refined.sort((a, b) => a.start - b.start);
-  return { issues: refined, tokens: text.trim() ? text.trim().split(/\s+/).length : 0, backend: "mock-ai", ai: true };
-}
-
-function delay<T>(value: T, ms: number, signal?: AbortSignal): Promise<T> {
-  return new Promise((resolve, reject) => {
-    const t = setTimeout(() => resolve(value), ms);
-    signal?.addEventListener("abort", () => {
-      clearTimeout(t);
-      reject(new DOMException("Aborted", "AbortError"));
-    });
-  });
-}
-
 /* --------------------------------- client -------------------------------- */
 
 export async function checkText(text: string, apiKey?: string | null, signal?: AbortSignal): Promise<CheckResponse> {
-  if (!API_BASE) return delay(mockCheck(text), 200, signal);
+  if (!API_BASE) throw new Error("VITE_API_URL is not configured");
   const res = await fetch(`${API_BASE}/api/check`, {
     method: "POST",
     headers: headers(apiKey),
@@ -176,7 +62,7 @@ export async function refineText(
   apiKey?: string | null,
   signal?: AbortSignal,
 ): Promise<CheckResponse> {
-  if (!API_BASE) return delay(mockRefine(text, issues), 4000, signal);
+  if (!API_BASE) throw new Error("VITE_API_URL is not configured");
   const res = await fetch(`${API_BASE}/api/refine`, {
     method: "POST",
     headers: headers(apiKey),
