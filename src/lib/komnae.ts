@@ -74,14 +74,8 @@ export async function refineText(
 }
 
 export async function validateKey(apiKey: string): Promise<ValidateKeyResponse> {
-  if (!API_BASE) {
-    return delay(
-      apiKey.trim().length > 20
-        ? { valid: true, model: "gemini-mock" }
-        : { valid: false, error: "សោមិនត្រឹមត្រូវ" },
-      900,
-    );
-  }
+  if (!API_BASE) throw new Error("VITE_API_URL is not configured");
+
   const res = await fetch(`${API_BASE}/api/validate-key`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
