@@ -185,6 +185,7 @@ function Komnae() {
                 }}
                 onActiveIndexChange={setActiveIndex}
                 onLoadExample={() => handleChangeText(EXAMPLE)}
+                aiRunning={aiState === "running"}
               />
 
               <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-border pt-4 text-sm">

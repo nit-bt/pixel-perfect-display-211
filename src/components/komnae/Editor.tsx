@@ -10,6 +10,8 @@ interface EditorProps {
   onIgnore: (issue: Issue) => void;
   onActiveIndexChange: (index: number | null) => void;
   onLoadExample: () => void;
+  /** True while the AI refinement pass is in flight — accept buttons are disabled. */
+  aiRunning: boolean;
 }
 
 const PLACEHOLDER = "ចាប់ផ្តើមសរសេរនៅទីនេះ...";
@@ -84,6 +86,7 @@ export function Editor({
   onIgnore,
   onActiveIndexChange,
   onLoadExample,
+  aiRunning,
 }: EditorProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [popover, setPopover] = useState<{ index: number; top: number; left: number } | null>(null);
@@ -184,11 +187,15 @@ export function Editor({
         >
           <button
             type="button"
+            disabled={aiRunning}
             onClick={() => onAccept(issue, issue.suggestion)}
-            className="w-full rounded-xl bg-primary px-4 py-3 text-lg font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+            className="w-full rounded-xl bg-primary px-4 py-3 text-lg font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {issue.suggestion}
           </button>
+          {aiRunning && (
+            <p className="mt-2 text-xs text-muted-foreground">AI កំពុងពិនិត្យ — សូមរង់ចាំ...</p>
+          )}
           {(issue.definition || issue.pos) && (
             <p className="mt-3 text-xs text-muted-foreground">
               {issue.pos ? <span className="font-medium">{issue.pos}</span> : null}
@@ -203,8 +210,9 @@ export function Editor({
                 <button
                   key={alt}
                   type="button"
+                  disabled={aiRunning}
                   onClick={() => onAccept(issue, alt)}
-                  className="rounded-full border border-border bg-secondary px-3 py-1 text-sm transition-colors hover:bg-accent"
+                  className="rounded-full border border-border bg-secondary px-3 py-1 text-sm transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {alt}
                 </button>
