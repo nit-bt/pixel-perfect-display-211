@@ -10,6 +10,8 @@ interface EditorProps {
   onIgnore: (issue: Issue) => void;
   onActiveIndexChange: (index: number | null) => void;
   onLoadExample: () => void;
+  /** True while the AI refinement pass is in flight — accept buttons are disabled. */
+  aiRunning: boolean;
 }
 
 const PLACEHOLDER = "ចាប់ផ្តើមសរសេរនៅទីនេះ...";
@@ -84,6 +86,7 @@ export function Editor({
   onIgnore,
   onActiveIndexChange,
   onLoadExample,
+  aiRunning,
 }: EditorProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [popover, setPopover] = useState<{ index: number; top: number; left: number } | null>(null);
