@@ -149,3 +149,52 @@
     color: var(--color-foreground);
   }
 }
+
+@layer components {
+  .komnae-brand {
+    font-family: "Noto Serif Khmer", "Noto Sans Khmer", serif;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  .komnae-editor {
+    font-family: "Noto Sans Khmer", "Khmer OS Battambang", sans-serif;
+    font-size: 20px;
+    line-height: 2;
+    word-break: break-word;
+  }
+
+  .komnae-flag {
+    text-decoration: underline wavy;
+    text-underline-offset: 6px;
+    text-decoration-thickness: 1.5px;
+    cursor: pointer;
+    border-radius: 3px;
+  }
+
+  .komnae-flag--spelling {
+    text-decoration-color: var(--flag-spelling);
+  }
+  .komnae-flag--grammar {
+    text-decoration-color: var(--flag-grammar);
+  }
+  .komnae-flag--style {
+    text-decoration-color: var(--flag-style);
+  }
+
+  .komnae-dot {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+  }
+  .komnae-dot--spelling {
+    background-color: var(--flag-spelling);
+  }
+  .komnae-dot--grammar {
+    background-color: var(--flag-grammar);
+  }
+  .komnae-dot--style {
+    background-color: var(--flag-style);
+  }
+}
