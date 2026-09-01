@@ -164,7 +164,7 @@ export async function checkText(text: string, apiKey?: string | null, signal?: A
     method: "POST",
     headers: headers(apiKey),
     body: JSON.stringify({ text, use_ai: false }),
-    signal,
+    signal: signal ?? null,
   });
   if (!res.ok) throw new Error(`check failed: ${res.status}`);
   return (await res.json()) as CheckResponse;
@@ -181,7 +181,7 @@ export async function refineText(
     method: "POST",
     headers: headers(apiKey),
     body: JSON.stringify({ text, issues }),
-    signal,
+    signal: signal ?? null,
   });
   if (!res.ok) throw new Error(`refine failed: ${res.status}`);
   return (await res.json()) as CheckResponse;
