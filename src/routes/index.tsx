@@ -258,7 +258,7 @@ function Komnae() {
               issues={visibleIssues}
               activeIndex={activeIndex}
               onSelect={setActiveIndex}
-              onAccept={(issue) => applyReplacement(issue, issue.suggestion)}
+              onAccept={applyReplacement}
               onIgnore={ignoreIssue}
               onAcceptAll={acceptAll}
             />
@@ -273,7 +273,7 @@ function Komnae() {
             issues={visibleIssues}
             activeIndex={activeIndex}
             onSelect={setActiveIndex}
-            onAccept={(issue) => applyReplacement(issue, issue.suggestion)}
+            onAccept={applyReplacement}
             onIgnore={ignoreIssue}
             onAcceptAll={acceptAll}
           />

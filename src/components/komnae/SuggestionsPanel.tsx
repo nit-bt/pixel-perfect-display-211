@@ -5,7 +5,7 @@ interface Props {
   issues: Issue[];
   activeIndex: number | null;
   onSelect: (index: number) => void;
-  onAccept: (issue: Issue) => void;
+  onAccept: (issue: Issue, replacement: string) => void;
   onIgnore: (issue: Issue) => void;
   onAcceptAll: () => void;
 }
@@ -58,20 +58,35 @@ export function SuggestionsPanel({ issues, activeIndex, onSelect, onAccept, onIg
               </p>
               <p className="mt-1 text-left text-sm leading-relaxed text-muted-foreground">{issue.reason}</p>
             </button>
-            <div className="mt-3 flex items-center gap-3">
+            <div className="mt-3 flex flex-wrap items-center gap-2">
               {issue.suggestion && (
                 <button
                   type="button"
-                  onClick={() => onAccept(issue)}
+                  onClick={() => onAccept(issue, issue.suggestion)}
                   className="ink-ring cartoon-shadow-sm lift rounded-xl bg-primary px-4 py-2 text-base font-semibold text-primary-foreground"
                 >
                   {issue.suggestion}
                 </button>
               )}
+
+              {/* Ranking is a guess: several candidates are often one edit away
+                  and only the writer knows which was meant. Showing the rest
+                  costs a row and removes the need to be right first time. */}
+              {issue.alternatives.map((alt) => (
+                <button
+                  key={alt}
+                  type="button"
+                  onClick={() => onAccept(issue, alt)}
+                  className="ink-ring lift rounded-xl bg-card px-3 py-1.5 text-base"
+                >
+                  {alt}
+                </button>
+              ))}
+
               <button
                 type="button"
                 onClick={() => onIgnore(issue)}
-                className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
+                className="ml-1 text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
               >
                 មិនអើពើ
               </button>
