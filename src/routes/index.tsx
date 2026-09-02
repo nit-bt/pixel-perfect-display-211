@@ -103,7 +103,7 @@ function Komnae() {
   // Debounced auto-check.
   useEffect(() => {
     if (!autoCheck) return;
-    const t = setTimeout(() => void runCheck(text), 800);
+    const t = setTimeout(() => void runCheck(text), 2500);
     return () => clearTimeout(t);
   }, [text, autoCheck, runCheck]);
 
@@ -144,6 +144,15 @@ function Komnae() {
     : visibleIssues.length > 0
       ? `រកឃើញ ${toKhmerNumber(visibleIssues.length)} កំហុស`
       : "គ្មានកំហុស";
+
+  const words = countWords(text);
+  const chars = text.length;
+  const readingMinutes = Math.max(1, Math.ceil(words / 180));
+
+  const ignoreIssue = (issue: Issue) => {
+    setIgnored((prev) => [...prev, `${issue.start}:${issue.end}:${issue.suggestion}`]);
+    setActiveIndex(null);
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
