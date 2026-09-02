@@ -59,6 +59,29 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-paper: var(--paper);
+  --color-cream: var(--cream);
+  --color-ink: var(--ink);
+  --color-sun: var(--sun);
+  --color-rose: var(--rose);
+  --color-sage: var(--sage);
+  --color-sky: var(--sky);
+  --color-glow: var(--glow);
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --animate-bob: bob 3s ease-in-out infinite;
+  --animate-rise: rise 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 :root {
@@ -101,6 +124,16 @@
   --sidebar-accent-foreground: oklch(0.3 0.04 50);
   --sidebar-border: oklch(0.9 0.016 82);
   --sidebar-ring: oklch(0.53 0.13 42);
+
+  /* Cartoon-traditional palette */
+  --paper: oklch(0.972 0.012 88);
+  --cream: oklch(0.945 0.032 82);
+  --ink: oklch(0.22 0.03 55);
+  --sun: oklch(0.83 0.15 82);
+  --rose: oklch(0.74 0.13 20);
+  --sage: oklch(0.76 0.09 150);
+  --sky: oklch(0.78 0.09 235);
+  --glow: oklch(0.9 0.11 95);
 }
 
 
@@ -145,8 +178,13 @@
   }
 
   body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-display);
   }
 }
 
@@ -196,5 +234,35 @@
   }
   .komnae-dot--style {
     background-color: var(--flag-style);
+  }
+}
+
+@layer components {
+  .cartoon-shadow {
+    box-shadow: 5px 5px 0 0 var(--ink);
+  }
+  .cartoon-shadow-sm {
+    box-shadow: 3px 3px 0 0 var(--ink);
+  }
+  .ink-ring {
+    border-width: 2.5px;
+    border-style: solid;
+    border-color: var(--ink);
+  }
+  .lift {
+    transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.18s ease;
+  }
+  .lift:hover {
+    transform: translate(-2px, -3px);
+    box-shadow: 8px 9px 0 0 var(--ink);
+  }
+  .font-display {
+    font-family: var(--font-display);
+  }
+  .doodle-divider {
+    height: 10px;
+    background-image: radial-gradient(circle at 6px 8px, var(--ink) 1.4px, transparent 1.6px);
+    background-size: 14px 10px;
+    opacity: 0.5;
   }
 }
