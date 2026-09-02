@@ -11,11 +11,11 @@ export function SiteNav() {
   return (
     <div className="sticky top-0 z-40 px-3 py-3">
       <nav className="mx-auto flex max-w-5xl items-center justify-between gap-3 rounded-full bg-cream px-3 py-2 ink-ring cartoon-shadow-sm">
-        <Link to="/" className="flex items-center gap-2 pl-2">
-          <span className="inline-block size-4 rotate-12 rounded-[6px] bg-sun ink-ring" aria-hidden />
-          <span className="komnae-brand text-lg text-ink">កំណែ</span>
-        </Link>
-        <ul className="flex items-center gap-1 overflow-x-auto">
+        {/* Reserved for the logo. Fixed width so the links stay put once
+            it lands, instead of shifting the whole bar. */}
+        <Link to="/" aria-label="កំណែ Komnae" className="flex h-9 w-32 shrink-0 items-center pl-2" />
+
+        <ul className="ml-auto flex items-center gap-1 overflow-x-auto">
           {LINKS.map((l) => (
             <li key={l.to}>
               <Link

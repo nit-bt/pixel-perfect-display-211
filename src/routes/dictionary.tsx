@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Camera, Loader2, Search } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 import {
   defineWord,
   suggestWords,
@@ -101,7 +101,7 @@ function DictionaryPage() {
           ៣៧,៧៧៦ ធាតុ
         </span>
         <h1 className="mt-4 font-display text-4xl font-black leading-tight sm:text-5xl">
-          វចនានុក្រម និងស្កេន
+          វចនានុក្រម
         </h1>
         <p className="mt-2 text-ink/70">រកមើលពាក្យខ្មែរណាមួយ — និយមន័យ ការបញ្ចេញសំឡេង និងថ្នាក់ពាក្យ។</p>
       </header>
@@ -173,19 +173,6 @@ function DictionaryPage() {
         )}
 
         {state.kind === "found" && <EntryCard entry={state.entry} />}
-      </section>
-
-      <div className="doodle-divider my-10" aria-hidden />
-
-      <section className="rounded-3xl border-[2.5px] border-dashed border-ink/40 bg-cream/50 p-6">
-        <div className="flex items-center gap-3">
-          <Camera className="size-6 text-ink/50" />
-          <h2 className="font-display text-2xl font-bold text-ink/70">ស្កេន និងវាយ</h2>
-          <span className="rounded-full bg-glow/60 px-3 py-1 text-xs font-bold text-ink/70">កំពុងអភិវឌ្ឍ</span>
-        </div>
-        <p className="mt-3 text-sm text-ink/60">
-          ថតរូបអត្ថបទខ្មែរ ហើយបម្លែងវាទៅជាអក្សរដែលអាចកែសម្រួលបាន។ មុខងារនេះនឹងមកដល់ឆាប់ៗនេះ។
-        </p>
       </section>
 
       <p className="mt-8 text-center font-mono text-xs text-ink/50">
