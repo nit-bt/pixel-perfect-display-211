@@ -17,20 +17,20 @@ const TYPE_LABEL: Record<Issue["type"], string> = {
 export function SuggestionsPanel({ issues, activeIndex, onSelect, onAcceptAll }: Props) {
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
-        <h2 className="text-sm font-semibold">ការណែនាំ ({toKhmerNumber(issues.length)})</h2>
+<div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
+        <h2 className="text-xl font-bold">ការណែនាំ ({toKhmerNumber(issues.length)})</h2>
         {issues.length > 0 && (
           <button
             type="button"
             onClick={onAcceptAll}
-            className="rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="rounded-full bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             ទទួលយកទាំងអស់
           </button>
         )}
       </div>
       <div className="flex-1 space-y-3 overflow-y-auto p-4">
-        {issues.length === 0 && <p className="text-sm text-muted-foreground">គ្មានការណែនាំទេ។</p>}
+        {issues.length === 0 && <p className="text-base text-muted-foreground">គ្មានការណែនាំទេ។</p>}
         {issues.map((issue, index) => (
           <button
             key={`${issue.start}-${issue.end}-${issue.suggestion}`}
@@ -40,16 +40,16 @@ export function SuggestionsPanel({ issues, activeIndex, onSelect, onAcceptAll }:
               activeIndex === index ? "border-primary" : "border-border hover:border-primary/40"
             }`}
           >
-            <div className="flex items-center justify-between gap-2">
+<div className="flex items-center justify-between gap-2">
               <span className={`komnae-dot komnae-dot--${issue.type}`} aria-hidden />
-              <span className="text-[11px] uppercase tracking-wide text-muted-foreground">{TYPE_LABEL[issue.type]}</span>
+              <span className="text-xs uppercase tracking-wide text-muted-foreground">{TYPE_LABEL[issue.type]}</span>
             </div>
-            <p className="mt-2 text-base leading-relaxed">
+            <p className="mt-2 text-lg leading-relaxed">
               <span className="text-muted-foreground line-through">{issue.original}</span>
               <span className="mx-2 text-muted-foreground">→</span>
               <span className="font-semibold">{issue.suggestion}</span>
             </p>
-            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{issue.reason}</p>
+            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{issue.reason}</p>
           </button>
         ))}
       </div>
