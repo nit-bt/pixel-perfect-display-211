@@ -4,6 +4,7 @@ import { Check, ChevronRight, Loader2, PanelRightClose, Settings } from "lucide-
 import { Editor } from "@/components/komnae/Editor";
 import { SuggestionsPanel } from "@/components/komnae/SuggestionsPanel";
 import { SettingsModal } from "@/components/komnae/SettingsModal";
+import { UploadToolbar } from "@/components/komnae/UploadToolbar";
 import {
   GEMINI_KEY_STORAGE,
   checkText,
@@ -48,6 +49,8 @@ function Komnae() {
   const [apiKey, setApiKey] = useState("");
   const [autoCheck, setAutoCheck] = useState(true);
   const [ignored, setIgnored] = useState<string[]>([]);
+  const [notice, setNotice] = useState("");
+  const [uploadError, setUploadError] = useState("");
 
   const requestId = useRef(0);
 
@@ -131,7 +134,10 @@ function Komnae() {
   const acceptAll = () => {
     let next = text;
     // Apply from the end so earlier offsets stay valid.
-    [...visibleIssues].sort((a, b) => b.start - a.start).forEach((i) => {
+    [...visibleIssues]
+      .filter((i) => i.suggestion)
+      .sort((a, b) => b.start - a.start)
+      .forEach((i) => {
       next = next.slice(0, i.start) + i.suggestion + next.slice(i.end);
     });
     setText(next);
@@ -181,6 +187,18 @@ function Komnae() {
       <div className="flex flex-1 overflow-hidden">
         <main className="flex-1 overflow-y-auto px-4 py-10 pb-40 lg:pb-10">
           <div className="mx-auto w-full max-w-[760px]">
+            <UploadToolbar
+              onSetText={(v) => { setNotice(""); setUploadError(""); handleChangeText(v); }}
+              onExtracted={(v, note) => { setUploadError(""); setNotice(note); handleChangeText(v); }}
+              onError={(msg) => { setNotice(""); setUploadError(msg); }}
+            />
+
+            {(notice || uploadError) && (
+              <div className={`ink-ring cartoon-shadow-sm mb-4 rounded-2xl px-4 py-3 text-sm ${uploadError ? "bg-rose/20" : "bg-sun/20"}`}>
+                {uploadError || notice}
+              </div>
+            )}
+
             {/* Chunky toolbar */}
             <div className="ink-ring cartoon-shadow-sm mb-5 flex flex-wrap items-center gap-3 rounded-2xl bg-cream px-4 py-3">
               <span className="ink-ring cartoon-shadow-sm rounded-full bg-sun px-3 py-1 text-sm font-semibold text-ink">

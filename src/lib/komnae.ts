@@ -21,7 +21,7 @@ export interface CheckResponse {
   issues: Issue[];
   tokens: number;
   backend: string;
-  ai: boolean;
+  ai: "ok" | "skipped" | "no_key" | "error" | "timeout";
   ai_error?: string | null;
 }
 
@@ -103,4 +103,67 @@ export function countWords(text: string): number {
   const latin = t.match(/[A-Za-z0-9]+/g) ?? [];
   const khmerCount = khmer.reduce((acc, chunk) => acc + Math.max(1, Math.round(chunk.length / 4)), 0);
   return khmerCount + latin.length;
+}
+
+/* ------------------------------- extraction ------------------------------- */
+
+export interface ExtractResponse {
+  text: string;
+  note: string;
+  characters: number;
+}
+
+export const ACCEPTED_UPLOAD_TYPES = ".pdf,.docx,.txt,.md";
+export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+
+/** Read a File as base64, without the data: URL prefix. */
+function toBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      resolve(result.includes(",") ? result.split(",")[1] : result);
+    };
+    reader.onerror = () => reject(new Error("មិនអាចអានឯកសារនេះបានទេ"));
+    reader.readAsDataURL(file);
+  });
+}
+
+/**
+ * Pull text out of an uploaded document.
+ *
+ * Extraction is deliberately separate from checking: if a document is garbled
+ * on the way in, the user sees it as extracted text they can fix, not as a
+ * page of spelling errors they did not make.
+ *
+ * Backend errors arrive as HTTP 400 with a `detail` field already written in
+ * Khmer for the user, so it is thrown through as-is.
+ */
+export async function extractDocument(file: File): Promise<ExtractResponse> {
+  if (!API_BASE) throw new Error("VITE_API_URL is not configured");
+
+  if (file.size > MAX_UPLOAD_BYTES) {
+    throw new Error("ឯកសារធំពេក (អតិបរមា ១០ MB)");
+  }
+
+  const data = await toBase64(file);
+
+  const res = await fetch(`${API_BASE}/api/extract`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ data, mime_type: file.type, filename: file.name }),
+  });
+
+  if (!res.ok) {
+    let detail = "មិនអាចអានឯកសារនេះបានទេ";
+    try {
+      const body = await res.json();
+      if (body?.detail) detail = body.detail;
+    } catch {
+      // Response was not JSON; keep the generic message.
+    }
+    throw new Error(detail);
+  }
+
+  return (await res.json()) as ExtractResponse;
 }
