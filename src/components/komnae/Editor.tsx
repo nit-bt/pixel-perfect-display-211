@@ -28,7 +28,8 @@ function buildHtml(text: string, issues: Issue[]) {
   sorted.forEach((issue, index) => {
     if (issue.start < cursor) return; // skip overlaps
     html += escapeHtml(text.slice(cursor, issue.start));
-    html += `<span class="komnae-flag komnae-flag--${issue.type}" data-issue="${index}">${escapeHtml(
+    const cls = issue.suggestion ? `komnae-flag--${issue.type}` : "komnae-flag--empty";
+    html += `<span class="komnae-flag ${cls}" data-issue="${index}">${escapeHtml(
       text.slice(issue.start, issue.end),
     )}</span>`;
     cursor = issue.end;
@@ -165,7 +166,7 @@ export function Editor({
         data-empty={text.length === 0}
         onInput={handleInput}
         onClick={handleClick}
-        className="komnae-editor min-h-[46vh] outline-none"
+        className="komnae-editor min-h-[320px] outline-none"
       />
       {text.length === 0 && (
         <div className="pointer-events-none absolute inset-0">

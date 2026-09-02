@@ -219,6 +219,12 @@
   .komnae-flag--style {
     text-decoration-color: var(--flag-style);
   }
+  .komnae-flag--empty {
+    text-decoration: underline dotted;
+    text-decoration-color: var(--muted-foreground);
+    text-underline-offset: 6px;
+    text-decoration-thickness: 1.5px;
+  }
 
   .komnae-dot {
     display: inline-block;

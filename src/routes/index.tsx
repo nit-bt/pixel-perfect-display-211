@@ -103,7 +103,7 @@ function Komnae() {
   // Debounced auto-check.
   useEffect(() => {
     if (!autoCheck) return;
-    const t = setTimeout(() => void runCheck(text), 800);
+    const t = setTimeout(() => void runCheck(text), 2500);
     return () => clearTimeout(t);
   }, [text, autoCheck, runCheck]);
 
@@ -145,6 +145,15 @@ function Komnae() {
       ? `រកឃើញ ${toKhmerNumber(visibleIssues.length)} កំហុស`
       : "គ្មានកំហុស";
 
+  const words = countWords(text);
+  const chars = text.length;
+  const readingMinutes = Math.max(1, Math.ceil(words / 180));
+
+  const ignoreIssue = (issue: Issue) => {
+    setIgnored((prev) => [...prev, `${issue.start}:${issue.end}:${issue.suggestion}`]);
+    setActiveIndex(null);
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <header className="flex items-center justify-between border-b border-border bg-background/80 px-5 py-3 backdrop-blur">
@@ -172,48 +181,55 @@ function Komnae() {
       <div className="flex flex-1 overflow-hidden">
         <main className="flex-1 overflow-y-auto px-4 py-10 pb-40 lg:pb-10">
           <div className="mx-auto w-full max-w-[760px]">
-            <div className="rounded-3xl border border-border bg-card px-8 py-10 shadow-[var(--shadow-card)] sm:px-12">
+            {/* Chunky toolbar */}
+            <div className="ink-ring cartoon-shadow-sm mb-5 flex flex-wrap items-center gap-3 rounded-2xl bg-cream px-4 py-3">
+              <span className="ink-ring cartoon-shadow-sm rounded-full bg-sun px-3 py-1 text-sm font-semibold text-ink">
+                {statusLabel}
+              </span>
+              {aiState === "running" && (
+                <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <Loader2 className="size-4 animate-spin" /> AI កំពុងពិនិត្យ...
+                </span>
+              )}
+              {aiState === "done" && (
+                <span className="inline-flex items-center gap-1.5 text-sm text-[var(--success)]">
+                  <Check className="size-4" /> AI
+                </span>
+              )}
+              {aiState === "failed" && (
+                <span className="text-sm text-muted-foreground/70">AI មិនបានពិនិត្យ</span>
+              )}
+              {!autoCheck && (
+                <button
+                  type="button"
+                  onClick={() => void runCheck(text)}
+                  className="ink-ring cartoon-shadow-sm lift ml-auto rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground"
+                >
+                  ពិនិត្យ
+                </button>
+              )}
+            </div>
+
+            {/* Cream paper writing surface */}
+            <div className="ink-ring cartoon-shadow rounded-3xl bg-cream px-8 py-10 sm:px-12">
               <Editor
                 text={text}
                 issues={visibleIssues}
                 activeIndex={activeIndex}
                 onChangeText={handleChangeText}
                 onAccept={applyReplacement}
-                onIgnore={(issue) => {
-                  setIgnored((prev) => [...prev, `${issue.start}:${issue.end}:${issue.suggestion}`]);
-                  setActiveIndex(null);
-                }}
+                onIgnore={ignoreIssue}
                 onActiveIndexChange={setActiveIndex}
                 onLoadExample={() => handleChangeText(EXAMPLE)}
                 aiRunning={aiState === "running"}
               />
+            </div>
 
-              <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-border pt-4 text-sm">
-                <span className="text-muted-foreground">{toKhmerNumber(countWords(text))} ពាក្យ</span>
-                <span className="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground">{statusLabel}</span>
-                {aiState === "running" && (
-                  <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <Loader2 className="size-3.5 animate-spin" /> AI កំពុងពិនិត្យ...
-                  </span>
-                )}
-                {aiState === "done" && (
-                  <span className="inline-flex items-center gap-1.5 text-xs text-[var(--success)]">
-                    <Check className="size-3.5" /> AI
-                  </span>
-                )}
-                {aiState === "failed" && (
-                  <span className="text-xs text-muted-foreground/70">AI មិនបានពិនិត្យ</span>
-                )}
-                {!autoCheck && (
-                  <button
-                    type="button"
-                    onClick={() => void runCheck(text)}
-                    className="ml-auto rounded-full bg-primary px-4 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90"
-                  >
-                    ពិនិត្យ
-                  </button>
-                )}
-              </div>
+            {/* Footer strip */}
+            <div className="ink-ring cartoon-shadow-sm mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-2xl bg-card px-4 py-3 text-sm text-muted-foreground">
+              <span>{toKhmerNumber(words)} ពាក្យ</span>
+              <span>{toKhmerNumber(chars)} តួអក្សរ</span>
+              <span>ពេលអាន ~{toKhmerNumber(readingMinutes)} នាទី</span>
             </div>
           </div>
         </main>
@@ -224,6 +240,8 @@ function Komnae() {
               issues={visibleIssues}
               activeIndex={activeIndex}
               onSelect={setActiveIndex}
+              onAccept={(issue) => applyReplacement(issue, issue.suggestion)}
+              onIgnore={ignoreIssue}
               onAcceptAll={acceptAll}
             />
           </aside>
@@ -237,6 +255,8 @@ function Komnae() {
             issues={visibleIssues}
             activeIndex={activeIndex}
             onSelect={setActiveIndex}
+            onAccept={(issue) => applyReplacement(issue, issue.suggestion)}
+            onIgnore={ignoreIssue}
             onAcceptAll={acceptAll}
           />
         </div>
