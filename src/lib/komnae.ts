@@ -122,7 +122,9 @@ function toBase64(file: File): Promise<string> {
     const reader = new FileReader();
     reader.onload = () => {
       const result = reader.result as string;
-      resolve(result.includes(",") ? result.split(",")[1] : result);
+      const encoded = result.includes(",") ? result.split(",")[1] : result;
+      if (!encoded) { reject(new Error("មិនអាចអានឯកសារនេះបានទេ")); return; }
+      resolve(encoded);
     };
     reader.onerror = () => reject(new Error("មិនអាចអានឯកសារនេះបានទេ"));
     reader.readAsDataURL(file);

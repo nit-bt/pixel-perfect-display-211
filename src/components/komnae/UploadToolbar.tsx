@@ -66,7 +66,8 @@ export function UploadToolbar({ onExtracted, onError, onSetText }: Props) {
       e.preventDefault();
       depth = 0;
       setDragging(false);
-      void handleFile(e.dataTransfer.files[0]);
+      const dropped = e.dataTransfer.files[0];
+      if (dropped) void handleFile(dropped);
     };
 
     window.addEventListener("dragenter", onDragEnter);

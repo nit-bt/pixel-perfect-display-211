@@ -1,7 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Camera, Loader2, Search } from "lucide-react";
-import { defineWord, type DictionaryEntry } from "@/lib/dictionary";
+import {
+  defineWord,
+  suggestWords,
+  type DictionaryEntry,
+  type SuggestMatch,
+} from "@/lib/dictionary";
 
 export const Route = createFileRoute("/dictionary")({
   head: () => ({
@@ -33,11 +38,12 @@ type State =
 function DictionaryPage() {
   const [query, setQuery] = useState("");
   const [state, setState] = useState<State>({ kind: "idle" });
+  const [matches, setMatches] = useState<SuggestMatch[]>([]);
+  const [showMatches, setShowMatches] = useState(false);
+  const justPicked = useRef(false);
 
-  const search = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const word = query.trim();
-    if (!word) return;
+  const lookUp = async (word: string) => {
+    setShowMatches(false);
     setState({ kind: "loading" });
     try {
       const entry = await defineWord(word);
@@ -45,6 +51,47 @@ function DictionaryPage() {
     } catch {
       setState({ kind: "error" });
     }
+  };
+
+  const search = (e: React.FormEvent) => {
+    e.preventDefault();
+    const word = query.trim();
+    if (word) void lookUp(word);
+  };
+
+  // Search-as-you-type. Someone typing សា has not made a mistake, they are
+  // partway through a word, so offer headwords rather than a 404.
+  useEffect(() => {
+    if (justPicked.current) {
+      justPicked.current = false;
+      return;
+    }
+    const prefix = query.trim();
+    if (prefix.length < 1) {
+      setMatches([]);
+      return;
+    }
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        const res = await suggestWords(prefix, 8, controller.signal);
+        setMatches(res.matches);
+        setShowMatches(res.matches.length > 0);
+      } catch {
+        // Aborted or offline — leave the previous list alone.
+      }
+    }, 250);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [query]);
+
+  const pick = (word: string) => {
+    justPicked.current = true;
+    setQuery(word);
+    setMatches([]);
+    void lookUp(word);
   };
 
   return (
@@ -60,15 +107,40 @@ function DictionaryPage() {
       </header>
 
       <form onSubmit={search} className="mt-8 flex gap-3">
-        <div className="flex flex-1 items-center gap-2 rounded-2xl bg-card px-4 py-3 ink-ring cartoon-shadow">
-          <Search className="size-5 shrink-0 text-ink/50" />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="បញ្ចូលពាក្យខ្មែរ..."
-            aria-label="ស្វែងរកពាក្យ"
-            className="w-full bg-transparent text-lg outline-none placeholder:text-ink/40"
-          />
+        <div className="relative flex-1">
+          <div className="flex items-center gap-2 rounded-2xl bg-card px-4 py-3 ink-ring cartoon-shadow">
+            <Search className="size-5 shrink-0 text-ink/50" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => matches.length > 0 && setShowMatches(true)}
+              onBlur={() => setTimeout(() => setShowMatches(false), 150)}
+              placeholder="បញ្ចូលពាក្យខ្មែរ..."
+              aria-label="ស្វែងរកពាក្យ"
+              autoComplete="off"
+              className="w-full bg-transparent text-lg outline-none placeholder:text-ink/40"
+            />
+          </div>
+
+          {showMatches && (
+            <ul className="absolute inset-x-0 top-full z-20 mt-2 max-h-80 overflow-y-auto rounded-2xl bg-card py-2 ink-ring cartoon-shadow">
+              {matches.map((m) => (
+                <li key={m.word}>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => pick(m.word)}
+                    className="block w-full px-4 py-2 text-left transition-colors hover:bg-sun/30"
+                  >
+                    <span className="text-lg font-semibold">{m.word}</span>
+                    {m.gloss && (
+                      <span className="ml-2 text-sm text-ink/55">{m.gloss}</span>
+                    )}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
         <button
           type="submit"
@@ -124,34 +196,43 @@ function DictionaryPage() {
 }
 
 function EntryCard({ entry }: { entry: DictionaryEntry }) {
+  // Pronunciation is stored per sense but is the same across them, so the
+  // first one stands in for the headword.
+  const pronunciation = entry.senses[0]?.pro;
+
   return (
     <article className="animate-[rise_0.4s_both] rounded-3xl bg-card p-7 ink-ring cartoon-shadow">
       <div className="flex flex-wrap items-baseline gap-3">
         <h2 className="komnae-brand text-3xl">{entry.word}</h2>
-        {entry.pronunciation && (
-          <span className="font-mono text-sm text-ink/60">/{entry.pronunciation}/</span>
-        )}
-        {entry.pos && (
-          <span className="rounded-full bg-sage/40 px-3 py-1 text-xs font-semibold ink-ring">{entry.pos}</span>
+        {pronunciation && (
+          <span className="font-mono text-sm text-ink/60">/{pronunciation}/</span>
         )}
       </div>
-      <p className="mt-4 text-lg leading-relaxed">{entry.definition}</p>
-      {entry.senses && entry.senses.length > 0 && (
-        <ol className="mt-5 space-y-3 border-t-[2.5px] border-ink/15 pt-5">
-          {entry.senses.map((s, i) => (
-            <li key={i} className="flex gap-3">
-              <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-sun text-xs font-bold ink-ring">
-                {i + 1}
-              </span>
-              <div>
-                {s.pos && <span className="mr-2 font-mono text-xs text-ink/60">{s.pos}</span>}
-                <span className="leading-relaxed">{s.definition}</span>
-                {s.example && <p className="mt-1 text-sm italic text-ink/60">{s.example}</p>}
-              </div>
-            </li>
-          ))}
-        </ol>
+
+      <ol className="mt-5 space-y-4 border-t-[2.5px] border-ink/15 pt-5">
+        {entry.senses.map((s, i) => (
+          <li key={i} className="flex gap-3">
+            <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-sun text-xs font-bold ink-ring">
+              {i + 1}
+            </span>
+            <div className="min-w-0">
+              {s.pos && (
+                <span className="mr-2 rounded-full bg-sage/40 px-2 py-0.5 align-middle text-xs font-semibold">
+                  {s.pos}
+                </span>
+              )}
+              <span className="leading-relaxed">{s.def}</span>
+            </div>
+          </li>
+        ))}
+      </ol>
+
+      {entry.source && (
+        <p className="mt-6 border-t-[2.5px] border-ink/10 pt-4 text-xs text-ink/50">
+          {entry.source}
+        </p>
       )}
     </article>
   );
 }
+
