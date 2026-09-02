@@ -18,7 +18,7 @@ export function SuggestionsPanel({ issues, activeIndex, onSelect, onAcceptAll }:
   return (
     <div className="flex h-full flex-col">
 <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
-        <h2 className="text-xl font-bold">ការណែនាំ ({toKhmerNumber(issues.length)})</h2>
+        <h2 className="text-3xl font-bold">ការណែនាំ ({toKhmerNumber(issues.length)})</h2>
         {issues.length > 0 && (
           <button
             type="button"
