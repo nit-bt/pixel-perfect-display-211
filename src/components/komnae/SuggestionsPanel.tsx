@@ -5,6 +5,8 @@ interface Props {
   issues: Issue[];
   activeIndex: number | null;
   onSelect: (index: number) => void;
+  onAccept: (issue: Issue) => void;
+  onIgnore: (issue: Issue) => void;
   onAcceptAll: () => void;
 }
 
@@ -14,43 +16,67 @@ const TYPE_LABEL: Record<Issue["type"], string> = {
   style: "រចនាបថ",
 };
 
-export function SuggestionsPanel({ issues, activeIndex, onSelect, onAcceptAll }: Props) {
+export function SuggestionsPanel({ issues, activeIndex, onSelect, onAccept, onIgnore, onAcceptAll }: Props) {
   return (
-    <div className="flex h-full flex-col">
-<div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
-        <h2 className="text-3xl font-bold">ការណែនាំ ({toKhmerNumber(issues.length)})</h2>
+    <div className="flex h-full flex-col text-left">
+      <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
+        <h2 className="text-left text-3xl font-bold">ការណែនាំ ({toKhmerNumber(issues.length)})</h2>
         {issues.length > 0 && (
           <button
             type="button"
             onClick={onAcceptAll}
-            className="rounded-full bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="ink-ring cartoon-shadow-sm lift rounded-full bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground"
           >
             ទទួលយកទាំងអស់
           </button>
         )}
       </div>
       <div className="flex-1 space-y-3 overflow-y-auto p-4">
-        {issues.length === 0 && <p className="text-base text-muted-foreground">គ្មានការណែនាំទេ។</p>}
+        {issues.length === 0 && <p className="text-left text-base text-muted-foreground">គ្មានការណែនាំទេ។</p>}
         {issues.map((issue, index) => (
-          <button
+          <div
             key={`${issue.start}-${issue.end}-${issue.suggestion}`}
-            type="button"
-            onClick={() => onSelect(index)}
-            className={`w-full rounded-xl border bg-card p-3 text-right shadow-[var(--shadow-card)] transition-colors ${
-              activeIndex === index ? "border-primary" : "border-border hover:border-primary/40"
+            className={`ink-ring cartoon-shadow-sm lift w-full rounded-2xl bg-card p-3 text-left ${
+              activeIndex === index ? "outline-2 outline-primary" : ""
             }`}
           >
-<div className="flex items-center justify-between gap-2">
-              <span className={`komnae-dot komnae-dot--${issue.type}`} aria-hidden />
-              <span className="text-xs uppercase tracking-wide text-muted-foreground">{TYPE_LABEL[issue.type]}</span>
+            <button type="button" onClick={() => onSelect(index)} className="w-full text-left">
+              <div className="flex items-center justify-between gap-2">
+                <span className={`komnae-dot komnae-dot--${issue.type}`} aria-hidden />
+                <span className="text-xs uppercase tracking-wide text-muted-foreground">{TYPE_LABEL[issue.type]}</span>
+              </div>
+              <p className="mt-2 text-left text-lg leading-relaxed">
+                {issue.suggestion ? (
+                  <>
+                    <span className="text-muted-foreground line-through">{issue.original}</span>
+                    <span className="mx-2 text-muted-foreground">→</span>
+                    <span className="font-semibold">{issue.suggestion}</span>
+                  </>
+                ) : (
+                  <span className="font-semibold">{issue.original}</span>
+                )}
+              </p>
+              <p className="mt-1 text-left text-sm leading-relaxed text-muted-foreground">{issue.reason}</p>
+            </button>
+            <div className="mt-3 flex items-center gap-3">
+              {issue.suggestion && (
+                <button
+                  type="button"
+                  onClick={() => onAccept(issue)}
+                  className="ink-ring cartoon-shadow-sm lift rounded-xl bg-primary px-4 py-2 text-base font-semibold text-primary-foreground"
+                >
+                  {issue.suggestion}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => onIgnore(issue)}
+                className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
+              >
+                មិនអើពើ
+              </button>
             </div>
-            <p className="mt-2 text-lg leading-relaxed">
-              <span className="text-muted-foreground line-through">{issue.original}</span>
-              <span className="mx-2 text-muted-foreground">→</span>
-              <span className="font-semibold">{issue.suggestion}</span>
-            </p>
-            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{issue.reason}</p>
-          </button>
+          </div>
         ))}
       </div>
     </div>
