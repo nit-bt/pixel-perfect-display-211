@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import type { Issue } from "@/lib/komnae";
+import type { Boundary, Issue } from "@/lib/komnae";
 
 interface EditorProps {
   text: string;
@@ -12,6 +12,8 @@ interface EditorProps {
   onLoadExample: () => void;
   /** True while the AI refinement pass is in flight — accept buttons are disabled. */
   aiRunning: boolean;
+  boundaries?: Boundary[];
+  showBoundaries?: boolean;
 }
 
 const PLACEHOLDER = "ចាប់ផ្តើមសរសេរនៅទីនេះ...";
@@ -20,21 +22,47 @@ function escapeHtml(s: string) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-function buildHtml(text: string, issues: Issue[]) {
+// An empty span, so it contributes nothing to innerText. Anything with
+// content here would be read back by readText() and corrupt the document,
+// taking every character offset with it.
+const BREAK_MARKER = '<span class="komnae-wb" aria-hidden="true"></span>';
+
+/** Escape a slice, inserting break markers at any boundary inside it. */
+function emit(text: string, from: number, to: number, marks: number[]) {
+  let out = "";
+  let cursor = from;
+  for (const at of marks) {
+    if (at > from && at < to) {
+      out += escapeHtml(text.slice(cursor, at)) + BREAK_MARKER;
+      cursor = at;
+    }
+  }
+  return out + escapeHtml(text.slice(cursor, to));
+}
+
+function buildHtml(text: string, issues: Issue[], marks: number[]) {
   if (!text) return "";
   const sorted = [...issues].filter((i) => i.start >= 0 && i.end <= text.length && i.end > i.start).sort((a, b) => a.start - b.start);
   let html = "";
   let cursor = 0;
   sorted.forEach((issue, index) => {
     if (issue.start < cursor) return; // skip overlaps
-    html += escapeHtml(text.slice(cursor, issue.start));
+    html += emit(text, cursor, issue.start, marks);
+
+    // A boundary landing exactly on the flagged span is dropped by emit's
+    // strict bounds, which is precisely the bar on either side of a
+    // misspelled word. Place those two here instead.
+    if (marks.includes(issue.start) && issue.start > 0) html += BREAK_MARKER;
+
     const cls = issue.suggestion ? `komnae-flag--${issue.type}` : "komnae-flag--empty";
-    html += `<span class="komnae-flag ${cls}" data-issue="${index}">${escapeHtml(
-      text.slice(issue.start, issue.end),
+    html += `<span class="komnae-flag ${cls}" data-issue="${index}">${emit(
+      text, issue.start, issue.end, marks,
     )}</span>`;
+    if (marks.includes(issue.end) && issue.end < text.length) html += BREAK_MARKER;
+
     cursor = issue.end;
   });
-  html += escapeHtml(text.slice(cursor));
+  html += emit(text, cursor, text.length, marks);
   return html.replace(/\n/g, "<br>");
 }
 
@@ -88,6 +116,8 @@ export function Editor({
   onActiveIndexChange,
   onLoadExample,
   aiRunning,
+  boundaries,
+  showBoundaries = false,
 }: EditorProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [popover, setPopover] = useState<{ index: number; top: number; left: number } | null>(null);
@@ -97,12 +127,16 @@ export function Editor({
   useLayoutEffect(() => {
     const root = ref.current;
     if (!root) return;
-    const html = buildHtml(text, issues);
+    const marks =
+      showBoundaries && boundaries
+        ? boundaries.map((b) => b.start).filter((n) => n > 0)
+        : [];
+    const html = buildHtml(text, issues, marks);
     if (root.innerHTML === html) return;
     const caret = document.activeElement === root ? getCaretOffset(root) : null;
     root.innerHTML = html;
     if (caret !== null) setCaretOffset(root, Math.min(caret, text.length));
-  }, [text, issues]);
+  }, [text, issues, boundaries, showBoundaries]);
 
   const readText = useCallback(() => {
     const root = ref.current;
@@ -195,7 +229,7 @@ export function Editor({
             {issue.suggestion}
           </button>
           {aiRunning && (
-            <p className="mt-2 text-xs text-muted-foreground">AI កំពុងពិនិត្យ — សូមរង់ចាំ...</p>
+            <p className="mt-2 text-xs text-muted-foreground">AI កំពុងពិនិត្យ សូមរង់ចាំ...</p>
           )}
           {(issue.definition || issue.pos) && (
             <p className="mt-3 text-xs text-muted-foreground">

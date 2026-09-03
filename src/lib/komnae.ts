@@ -17,8 +17,15 @@ export interface Issue {
   confidence?: number;
 }
 
+export interface Boundary {
+  start: number;
+  end: number;
+}
+
 export interface CheckResponse {
   issues: Issue[];
+  /** Word boundaries from the segmenter, for optional break markers. */
+  boundaries?: Boundary[];
   tokens: number;
   backend: string;
   ai: "ok" | "skipped" | "no_key" | "error" | "timeout";

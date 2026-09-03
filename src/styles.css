@@ -67,9 +67,12 @@
   --color-sage: var(--sage);
   --color-sky: var(--sky);
   --color-glow: var(--glow);
-  --font-display: "Fraunces", Georgia, serif;
-  --font-body: "Inter", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  /* Fraunces has no Khmer glyphs, so without a Khmer face in the stack
+     every Khmer character falls through to an arbitrary system font and
+     renders visibly smaller than the Latin beside it. */
+  --font-display: "Fraunces", "Noto Serif Khmer", Georgia, serif;
+  --font-body: "Inter", "Noto Sans Khmer", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Noto Sans Khmer", ui-monospace, monospace;
   --animate-bob: bob 3s ease-in-out infinite;
   --animate-rise: rise 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
@@ -272,3 +275,38 @@
     opacity: 0.5;
   }
 }
+
+
+/* Word break marker. Zero width and empty, so it never becomes part of the
+   document text — only a border rendered between segments. */
+.komnae-wb {
+  display: inline-block;
+  width: 0;
+  height: 1em;
+  margin: 0 0.14em;
+  vertical-align: -0.18em;
+  border-left: 1px solid color-mix(in oklab, currentColor 28%, transparent);
+}
+
+
+/* Khmer needs more room than Latin at the same nominal size: the script has
+   subscript consonants below the baseline and diacritics above, so the
+   readable area is squeezed from both directions. Tailwind's small sizes are
+   tuned for Latin and come out unreadable here, so lift the bottom of the
+   scale rather than editing every component. */
+:lang(km),
+body {
+  --text-xs: 0.9375rem;   /* 12px -> 15px */
+  --text-sm: 1.0625rem;   /* 14px -> 17px */
+  --text-base: 1.1875rem; /* 16px -> 19px */
+  --text-lg: 1.3125rem;   /* 18px -> 21px */
+}
+
+.text-xs { font-size: var(--text-xs); line-height: 1.85; }
+.text-sm { font-size: var(--text-sm); line-height: 1.85; }
+.text-base { font-size: var(--text-base); line-height: 1.8; }
+.text-lg { font-size: var(--text-lg); line-height: 1.75; }
+
+/* Mono is used for pronunciation and part-of-speech labels, which are Latin
+   or short Khmer and do not need the same lift. */
+.font-mono.text-xs { font-size: 0.8125rem; line-height: 1.5; }

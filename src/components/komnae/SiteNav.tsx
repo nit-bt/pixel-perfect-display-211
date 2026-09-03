@@ -11,9 +11,20 @@ export function SiteNav() {
   return (
     <div className="sticky top-0 z-40 px-3 py-3">
       <div className="mx-auto flex max-w-5xl items-center gap-3">
-        {/* Reserved for the logo. Fixed height so the row does not jump when
-            an image lands here later. */}
-        <Link to="/" aria-label="កំណែ Komnae" className="flex h-11 w-40 shrink-0 items-center" />
+        <Link to="/" aria-label="កំណែ Komnae" className="flex h-24 shrink-0 items-center">
+          {/* The mark already reads កំណែ, so no wordmark beside it. Height is
+              fixed and width auto so the row never reflows while it loads. */}
+          <img
+            src="/logo.png"
+            alt="កំណែ Komnae"
+            width={192}
+            height={232}
+            className="h-20 w-auto"
+          />
+          <span className="komnae-brand ml-3 whitespace-nowrap text-xl text-ink">
+            កំណែ Komnae
+          </span>
+        </Link>
 
         {/* The pill hugs its links rather than spanning the width, so it reads
             as a control rather than a header bar. */}

@@ -5,12 +5,14 @@ import { Editor } from "@/components/komnae/Editor";
 import { SuggestionsPanel } from "@/components/komnae/SuggestionsPanel";
 import { SettingsModal } from "@/components/komnae/SettingsModal";
 import { UploadToolbar } from "@/components/komnae/UploadToolbar";
+import { CameraPanel } from "@/components/komnae/CameraPanel";
 import {
   GEMINI_KEY_STORAGE,
   checkText,
   countWords,
   refineText,
   toKhmerNumber,
+  type Boundary,
   type Issue,
 } from "@/lib/komnae";
 
@@ -51,6 +53,9 @@ function Komnae() {
   const [ignored, setIgnored] = useState<string[]>([]);
   const [notice, setNotice] = useState("");
   const [uploadError, setUploadError] = useState("");
+  const [boundaries, setBoundaries] = useState<Boundary[]>([]);
+  const [photo, setPhoto] = useState<string | null>(null);
+  const [showBoundaries, setShowBoundaries] = useState(false);
 
   const requestId = useRef(0);
 
@@ -81,6 +86,7 @@ function Komnae() {
         const phase1 = await checkText(value, apiKey || null);
         if (id !== requestId.current) return;
         setIssues(phase1.issues);
+        setBoundaries(phase1.boundaries ?? []);
         setChecking(false);
 
         // Phase 2 — slow AI refinement; never blocks the editor.
@@ -153,7 +159,6 @@ function Komnae() {
 
   const words = countWords(text);
   const chars = text.length;
-  const readingMinutes = Math.max(1, Math.ceil(words / 180));
 
   const ignoreIssue = (issue: Issue) => {
     setIgnored((prev) => [...prev, `${issue.start}:${issue.end}:${issue.suggestion}`]);
@@ -162,8 +167,8 @@ function Komnae() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <header className="flex items-center justify-between border-b border-border bg-background/80 px-5 py-3 backdrop-blur">
-        <span className="komnae-brand text-xl">កំណែ Komnae</span>
+      <header className="flex items-center border-b border-border bg-background/80 px-5 py-3 backdrop-blur">
+  
         <div className="flex items-center gap-1">
           <button
             type="button"
@@ -221,7 +226,7 @@ function Komnae() {
                 <button
                   type="button"
                   onClick={() => void runCheck(text)}
-                  className="ink-ring cartoon-shadow-sm lift ml-auto rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground"
+                  className="ink-ring cartoon-shadow-sm lift rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground"
                 >
                   ពិនិត្យ
                 </button>
@@ -240,6 +245,8 @@ function Komnae() {
                 onActiveIndexChange={setActiveIndex}
                 onLoadExample={() => handleChangeText(EXAMPLE)}
                 aiRunning={aiState === "running"}
+                boundaries={boundaries}
+                showBoundaries={showBoundaries}
               />
             </div>
 
@@ -247,8 +254,10 @@ function Komnae() {
             <div className="ink-ring cartoon-shadow-sm mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-2xl bg-card px-4 py-3 text-sm text-muted-foreground">
               <span>{toKhmerNumber(words)} ពាក្យ</span>
               <span>{toKhmerNumber(chars)} តួអក្សរ</span>
-              <span>ពេលអាន ~{toKhmerNumber(readingMinutes)} នាទី</span>
             </div>
+
+            <CameraPanel photo={photo} onPhotoChange={setPhoto} />
+
           </div>
         </main>
 
@@ -280,6 +289,7 @@ function Komnae() {
         </div>
       </div>
 
+
       <SettingsModal
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
@@ -287,6 +297,8 @@ function Komnae() {
         onApiKeyChange={saveApiKey}
         autoCheck={autoCheck}
         onAutoCheckChange={setAutoCheck}
+        showBoundaries={showBoundaries}
+        onShowBoundariesChange={setShowBoundaries}
       />
     </div>
   );

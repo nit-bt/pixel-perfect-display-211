@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronDown, FilePlus2, Loader2, ScanLine, Upload } from "lucide-react";
+import { ChevronDown, FilePlus2, Loader2, Upload } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -148,13 +148,6 @@ export function UploadToolbar({ onExtracted, onError, onSetText }: Props) {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Scan — not built yet, and labelled as such rather than left to look broken. */}
-        <div className="inline-flex items-center gap-2 rounded-2xl border-2 border-dashed border-border px-4 py-2.5 text-sm text-muted-foreground/70">
-          <ScanLine className="size-4" />
-          ស្កេនរូបភាព
-          <span className="rounded-full bg-muted px-2 py-0.5 text-xs">កំពុងអភិវឌ្ឍ</span>
-        </div>
-
         <input
           ref={inputRef}
           type="file"
@@ -168,6 +161,8 @@ export function UploadToolbar({ onExtracted, onError, onSetText }: Props) {
           }}
         />
       </div>
+
+
 
       {dragging && (
         <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-ink/20 backdrop-blur-sm">

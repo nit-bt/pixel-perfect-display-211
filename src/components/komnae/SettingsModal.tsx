@@ -9,9 +9,20 @@ interface Props {
   onApiKeyChange: (key: string) => void;
   autoCheck: boolean;
   onAutoCheckChange: (value: boolean) => void;
+  showBoundaries: boolean;
+  onShowBoundariesChange: (value: boolean) => void;
 }
 
-export function SettingsModal({ open, onClose, apiKey, onApiKeyChange, autoCheck, onAutoCheckChange }: Props) {
+export function SettingsModal({
+  open,
+  onClose,
+  apiKey,
+  onApiKeyChange,
+  autoCheck,
+  onAutoCheckChange,
+  showBoundaries,
+  onShowBoundariesChange,
+}: Props) {
   const [draft, setDraft] = useState(apiKey);
   const [testing, setTesting] = useState(false);
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
@@ -106,6 +117,26 @@ export function SettingsModal({ open, onClose, apiKey, onApiKeyChange, autoCheck
           >
             <span
               className={`block size-5 rounded-full bg-background transition-transform ${autoCheck ? "translate-x-5" : ""}`}
+            />
+          </button>
+        </div>
+
+        {/* A debugging view rather than a writing feature: useful when
+            segmentation misbehaves, noise for anyone just writing. */}
+        <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
+          <div>
+            <p className="text-sm font-medium">បង្ហាញព្រំដែនពាក្យ</p>
+            <p className="text-xs text-muted-foreground">សម្រាប់អ្នកអភិវឌ្ឍន៍៖ បង្ហាញកន្លែងបំបែកពាក្យ</p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={showBoundaries}
+            onClick={() => onShowBoundariesChange(!showBoundaries)}
+            className={`h-6 w-11 rounded-full p-0.5 transition-colors ${showBoundaries ? "bg-primary" : "bg-muted"}`}
+          >
+            <span
+              className={`block size-5 rounded-full bg-background transition-transform ${showBoundaries ? "translate-x-5" : ""}`}
             />
           </button>
         </div>

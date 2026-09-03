@@ -103,7 +103,7 @@ function DictionaryPage() {
         <h1 className="mt-4 font-display text-4xl font-black leading-tight sm:text-5xl">
           វចនានុក្រម
         </h1>
-        <p className="mt-2 text-ink/70">រកមើលពាក្យខ្មែរណាមួយ — និយមន័យ ការបញ្ចេញសំឡេង និងថ្នាក់ពាក្យ។</p>
+        <p className="mt-2 text-ink/70">រកមើលពាក្យខ្មែរណាមួយ៖ និយមន័យ ការបញ្ចេញសំឡេង និងថ្នាក់ពាក្យ។</p>
       </header>
 
       <form onSubmit={search} className="mt-8 flex gap-3">
@@ -176,7 +176,7 @@ function DictionaryPage() {
       </section>
 
       <p className="mt-8 text-center font-mono text-xs text-ink/50">
-        វចនានុក្រមខ្មែរ ២០២២, រាជបណ្ឌិត្យសភាកម្ពុជា — 37,776 entries
+        វចនានុក្រមខ្មែរ ២០២២, រាជបណ្ឌិត្យសភាកម្ពុជា
       </p>
     </main>
   );
