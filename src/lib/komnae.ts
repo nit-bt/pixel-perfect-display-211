@@ -120,7 +120,7 @@ export interface ExtractResponse {
   characters: number;
 }
 
-export const ACCEPTED_UPLOAD_TYPES = ".pdf,.docx,.txt,.md";
+export const ACCEPTED_UPLOAD_TYPES = ".pdf,.docx,.txt,.md,.png,.jpg,.jpeg,.webp";
 export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
 /** Read a File as base64, without the data: URL prefix. */
