@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronDown, FilePlus2, Loader2, Upload } from "lucide-react";
+import { ChevronDown, Loader2, Upload } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -85,38 +85,6 @@ export function UploadToolbar({ onExtracted, onError, onSetText }: Props) {
   return (
     <>
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        {/* New doc */}
-        <DropdownMenu>
-          <div className="ink-ring cartoon-shadow-sm lift flex items-stretch overflow-hidden rounded-2xl bg-primary text-primary-foreground">
-            <button
-              type="button"
-              onClick={() => onSetText("")}
-              className="inline-flex items-center gap-2 px-4 py-2.5 font-semibold"
-            >
-              <FilePlus2 className="size-4" />
-              ឯកសារថ្មី
-            </button>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                aria-label="ជម្រើសឯកសារថ្មី"
-                className="border-l border-primary-foreground/25 px-2.5"
-              >
-                <ChevronDown className="size-4" />
-              </button>
-            </DropdownMenuTrigger>
-          </div>
-          <DropdownMenuContent align="start" className="ink-ring cartoon-shadow-sm rounded-xl">
-            <DropdownMenuItem onSelect={() => onSetText("")}>ទទេ</DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => onSetText(SAMPLE)}>
-              គំរូខ្លី (មានកំហុស)
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => onSetText(LONGER_SAMPLE)}>
-              គំរូវែង (មានកំហុស)
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
         {/* Upload */}
         <DropdownMenu>
           <div className="ink-ring cartoon-shadow-sm lift flex items-stretch overflow-hidden rounded-2xl border-dashed bg-card">
