@@ -89,17 +89,8 @@ function Komnae() {
         setBoundaries(phase1.boundaries ?? []);
         setChecking(false);
 
-        // Phase 2 — slow AI refinement; never blocks the editor.
-        setAiState("running");
-        try {
-          const phase2 = await refineText(value, phase1.issues, apiKey || null);
-          if (id !== requestId.current) return; // stale response, discard
-          setIssues(phase2.issues);
-          setAiState("done");
-        } catch {
-          if (id !== requestId.current) return;
-          setAiState("failed"); // keep phase 1 underlines
-        }
+        // The AI pass is not started here. It runs on its own, longer timer:
+        // see the effect below.
       } catch {
         if (id !== requestId.current) return;
         setChecking(false);
@@ -109,12 +100,46 @@ function Komnae() {
     [apiKey],
   );
 
-  // Debounced auto-check.
+  // The dictionary pass is local and costs nothing, so it can fire on a
+  // short pause. Underlines appear while the writer is still looking at the
+  // word they just typed.
   useEffect(() => {
     if (!autoCheck) return;
-    const t = setTimeout(() => void runCheck(text), 2500);
+    const t = setTimeout(() => void runCheck(text), 600);
     return () => clearTimeout(t);
   }, [text, autoCheck, runCheck]);
+
+  // The AI pass costs a request each time and takes anywhere from three to
+  // forty seconds, so it waits for a real pause rather than a gap between
+  // words. Typing continuously never triggers it; stopping to think does.
+  useEffect(() => {
+    if (!autoCheck || !text.trim() || issues.length === 0) return;
+
+    const t = setTimeout(async () => {
+      const id = requestId.current;
+      setAiState("running");
+      try {
+        const refined = await refineText(text, issues, apiKey || null);
+        if (id !== requestId.current) return; // the writer moved on
+        // Nothing to apply when there is no key: the response is the request
+        // sent back, and showing a tick would claim work that never happened.
+        if (refined.ai === "no_key" || refined.ai === "skipped") {
+          setAiState("idle");
+          return;
+        }
+        setIssues(refined.issues);
+        setAiState("done");
+      } catch {
+        if (id !== requestId.current) return;
+        setAiState("failed"); // phase 1 underlines stand
+      }
+    }, 2500);
+
+    return () => clearTimeout(t);
+    // Deliberately keyed on text, not issues: re-running whenever the issue
+    // list changes would loop, since this effect sets that list.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [text, autoCheck, apiKey]);
 
   const visibleIssues = issues.filter((i) => !ignored.includes(`${i.start}:${i.end}:${i.suggestion}`));
 
