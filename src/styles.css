@@ -314,4 +314,6 @@ body {
 
 /* A single wide child forces the whole page to scroll sideways on a phone,
    which reads as the layout not fitting the screen. */
-html, body { overflow-x: hidden; max-width: 100%; }
+/* overflow-x on html breaks position: sticky, because it makes the
+   element a scroll container. Clipping on body alone keeps both. */
+body { overflow-x: clip; max-width: 100%; }
