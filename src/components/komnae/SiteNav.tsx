@@ -9,7 +9,7 @@ const LINKS = [
 
 export function SiteNav() {
   return (
-    <div className="sticky top-0 z-40 px-3 py-3">
+    <div className="sticky top-0 z-40 border-b-2 border-ink/15 bg-paper/80 px-3 py-3 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center gap-3">
         <Link to="/" aria-label="កំណែ Komnae" className="flex h-24 shrink-0 items-center">
           {/* The mark already reads កំណែ, so no wordmark beside it. Height is

@@ -189,8 +189,8 @@ function Komnae() {
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
-        <main className="flex-1 overflow-y-auto px-4 py-10 pb-40 lg:pb-10">
+      <div className="flex flex-1">
+        <main className="flex-1 px-4 py-10 pb-40 lg:pb-10">
           <div className="mx-auto w-full max-w-[760px]">
             <UploadToolbar
               onSetText={(v) => { setNotice(""); setUploadError(""); handleChangeText(v); }}
@@ -262,7 +262,7 @@ function Komnae() {
         </main>
 
         {panelOpen && (
-          <aside className="hidden w-[320px] shrink-0 border-l border-border bg-sidebar lg:block">
+          <aside className="sticky top-32 hidden h-[calc(100vh-8rem)] w-[320px] shrink-0 border-l border-border bg-sidebar lg:block">
             <SuggestionsPanel
               issues={visibleIssues}
               activeIndex={activeIndex}

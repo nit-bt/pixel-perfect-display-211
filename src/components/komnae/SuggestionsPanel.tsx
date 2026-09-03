@@ -19,7 +19,7 @@ const TYPE_LABEL: Record<Issue["type"], string> = {
 export function SuggestionsPanel({ issues, activeIndex, onSelect, onAccept, onIgnore, onAcceptAll }: Props) {
   return (
     <div className="flex h-full flex-col text-left">
-      <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
+      <div className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-border bg-sidebar px-4 py-3">
         <h2 className="text-left text-3xl font-bold">ការណែនាំ ({toKhmerNumber(issues.length)})</h2>
         {issues.length > 0 && (
           <button
