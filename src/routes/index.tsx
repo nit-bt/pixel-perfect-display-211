@@ -281,7 +281,15 @@ function Komnae() {
               <span>{toKhmerNumber(chars)} តួអក្សរ</span>
             </div>
 
-            <CameraPanel photo={photo} onPhotoChange={setPhoto} />
+            <CameraPanel
+              photo={photo}
+              onPhotoChange={setPhoto}
+              onTextExtracted={(v, note) => {
+                setUploadError("");
+                setNotice(note);
+                handleChangeText(v);
+              }}
+            />
 
           </div>
         </main>

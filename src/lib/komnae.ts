@@ -176,3 +176,37 @@ export async function extractDocument(file: File): Promise<ExtractResponse> {
 
   return (await res.json()) as ExtractResponse;
 }
+
+/**
+ * Run OCR on a captured photo.
+ *
+ * Shares the extract endpoint with file uploads, so a photograph and a
+ * scanned PDF take the same path and return the same warning note.
+ */
+export async function extractDataUrl(dataUrl: string): Promise<ExtractResponse> {
+  if (!API_BASE) throw new Error("VITE_API_URL is not configured");
+
+  const comma = dataUrl.indexOf(",");
+  const header = dataUrl.slice(0, comma);
+  const data = dataUrl.slice(comma + 1);
+  const mime = header.match(/data:([^;]+)/)?.[1] ?? "image/jpeg";
+
+  const res = await fetch(`${API_BASE}/api/extract`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ data, mime_type: mime, filename: "camera.jpg" }),
+  });
+
+  if (!res.ok) {
+    let detail = "មិនអាចអានអត្ថបទពីរូបភាពនេះបានទេ";
+    try {
+      const body = await res.json();
+      if (body?.detail) detail = body.detail;
+    } catch {
+      // not JSON; keep the generic message
+    }
+    throw new Error(detail);
+  }
+
+  return (await res.json()) as ExtractResponse;
+}

@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Camera, RotateCcw, X } from "lucide-react";
+import { Camera, Loader2, RotateCcw, TextCursorInput, X } from "lucide-react";
+import { extractDataUrl } from "@/lib/komnae";
 
 interface Props {
   /** The kept photo, or null. Owned by the page so it survives this panel. */
   photo: string | null;
   onPhotoChange: (photo: string | null) => void;
+  /** Called with text read out of the photo. */
+  onTextExtracted: (text: string, note: string) => void;
 }
 
 type Status = "idle" | "starting" | "live" | "denied" | "unavailable";
@@ -20,10 +23,12 @@ type Status = "idle" | "starting" | "live" | "denied" | "unavailable";
  *
  * Nothing is uploaded. The frame never leaves the browser.
  */
-export function CameraPanel({ photo, onPhotoChange }: Props) {
+export function CameraPanel({ photo, onPhotoChange, onTextExtracted }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [status, setStatus] = useState<Status>("idle");
+  const [reading, setReading] = useState(false);
+  const [readError, setReadError] = useState("");
 
   const stop = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -155,6 +160,26 @@ export function CameraPanel({ photo, onPhotoChange }: Props) {
             <div className="flex items-center gap-4">
               <button
                 type="button"
+                disabled={reading}
+                onClick={async () => {
+                  setReadError("");
+                  setReading(true);
+                  try {
+                    const result = await extractDataUrl(photo);
+                    onTextExtracted(result.text, result.note);
+                  } catch (err) {
+                    setReadError(err instanceof Error ? err.message : "អានមិនបាន");
+                  } finally {
+                    setReading(false);
+                  }
+                }}
+                className="ink-ring cartoon-shadow-sm lift inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+              >
+                {reading ? <Loader2 className="size-3.5 animate-spin" /> : <TextCursorInput className="size-3.5" />}
+                {reading ? "កំពុងអាន..." : "អានអត្ថបទ"}
+              </button>
+              <button
+                type="button"
                 onClick={() => void start()}
                 className="inline-flex items-center gap-1.5 text-sm underline underline-offset-4"
               >
@@ -175,6 +200,9 @@ export function CameraPanel({ photo, onPhotoChange }: Props) {
             alt="ឯកសារយោង"
             className="max-h-96 w-full rounded-2xl object-contain"
           />
+          {readError && (
+            <p className="mt-3 rounded-xl bg-rose/20 px-3 py-2 text-sm">{readError}</p>
+          )}
         </div>
       )}
 
