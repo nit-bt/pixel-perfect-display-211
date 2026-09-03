@@ -11,7 +11,7 @@ export function SiteNav() {
   return (
     <div className="sticky top-0 z-40 border-b-2 border-ink/15 bg-paper/80 px-3 py-3 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center gap-3">
-        <Link to="/" aria-label="កំណែ Komnae" className="flex h-24 shrink-0 items-center">
+        <Link to="/" aria-label="កំណែ Komnae" className="flex h-14 shrink-0 items-center sm:h-24">
           {/* The mark already reads កំណែ, so no wordmark beside it. Height is
               fixed and width auto so the row never reflows while it loads. */}
           <img
@@ -19,23 +19,23 @@ export function SiteNav() {
             alt="កំណែ Komnae"
             width={192}
             height={232}
-            className="h-20 w-auto"
+            className="h-11 w-auto sm:h-20"
           />
-          <span className="komnae-brand ml-3 whitespace-nowrap text-xl text-ink">
+          <span className="komnae-brand ml-3 hidden whitespace-nowrap text-xl text-ink sm:inline">
             កំណែ Komnae
           </span>
         </Link>
 
         {/* The pill hugs its links rather than spanning the width, so it reads
             as a control rather than a header bar. */}
-        <nav className="ml-auto rounded-full bg-cream px-2 py-2 ink-ring cartoon-shadow-sm">
+        <nav className="ml-auto rounded-full bg-cream px-1.5 py-1.5 ink-ring cartoon-shadow-sm sm:px-2 sm:py-2">
           <ul className="flex items-center gap-1">
             {LINKS.map((l) => (
               <li key={l.to}>
                 <Link
                   to={l.to}
                   activeOptions={{ exact: l.to === "/" }}
-                  className="block whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium text-ink/70 transition-colors hover:bg-paper hover:text-ink [&.active]:bg-ink [&.active]:text-paper"
+                  className="block whitespace-nowrap rounded-full px-2.5 py-1.5 text-sm sm:px-4 font-medium text-ink/70 transition-colors hover:bg-paper hover:text-ink [&.active]:bg-ink [&.active]:text-paper"
                 >
                   {l.label}
                 </Link>

@@ -310,3 +310,8 @@ body {
 /* Mono is used for pronunciation and part-of-speech labels, which are Latin
    or short Khmer and do not need the same lift. */
 .font-mono.text-xs { font-size: 0.8125rem; line-height: 1.5; }
+
+
+/* A single wide child forces the whole page to scroll sideways on a phone,
+   which reads as the layout not fitting the screen. */
+html, body { overflow-x: hidden; max-width: 100%; }
